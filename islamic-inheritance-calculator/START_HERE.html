@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كيفية تشغيل برنامج المواريث</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            direction: rtl;
+            text-align: right;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .welcome {
+            background: linear-gradient(135deg, #a8e6cf 0%, #56ab2f 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .step {
+            background: #f8f9ff;
+            border-right: 5px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-left: 15px;
+            font-size: 1.2em;
+        }
+        .step h3 {
+            display: inline;
+            color: #764ba2;
+            font-size: 1.3em;
+        }
+        .step p {
+            margin-top: 15px;
+            line-height: 1.8;
+            font-size: 1.1em;
+            color: #333;
+        }
+        .big-button {
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 15px;
+            text-decoration: none;
+            margin: 30px auto;
+            width: 80%;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            transition: transform 0.3s;
+        }
+        .big-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+        }
+        .note {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .note strong {
+            color: #856404;
+            font-size: 1.2em;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌙 مرحباً بك في برنامج حساب المواريث الشرعية</h1>
+
+        <div class="welcome">
+            <h2>أهلاً وسهلاً! أنت على بُعد خطوة واحدة من استخدام البرنامج</h2>
+            <p>هذا دليل مبسط للمبتدئين</p>
+        </div>
+
+        <div class="note">
+            <strong>⚡ الطريقة السريعة:</strong>
+            <p>اضغط على الزر الأخضر بالأسفل لفتح البرنامج مباشرة!</p>
+        </div>
+
+        <a href="public/index.html" class="big-button">
+            🚀 افتح البرنامج الآن
+        </a>
+
+        <h2 style="color: #667eea; margin-top: 40px;">📋 مميزات البرنامج:</h2>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">✅</div>
+                <strong>حساب دقيق</strong>
+                <p>للأنصبة الشرعية</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <strong>تقارير مفصلة</strong>
+                <p>شاملة وواضحة</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎨</div>
+                <strong>واجهة جميلة</strong>
+                <p>سهلة الاستخدام</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔍</div>
+                <strong>معالجة شاملة</strong>
+                <p>للحجب والعول والرد</p>
+            </div>
+        </div>
+
+        <h2 style="color: #667eea; margin-top: 40px;">🎯 كيفية الاستخدام:</h2>
+
+        <div class="step">
+            <span class="step-number">1</span>
+            <h3>افتح البرنامج</h3>
+            <p>اضغط على الزر الأخضر أعلاه، أو افتح ملف <code>public/index.html</code> مباشرة</p>
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            <h3>أدخل قيمة التركة</h3>
+            <p>في الحقل الأول، أدخل قيمة التركة بالريال (مثال: 100000)</p>
+        </div>
+
+        <div class="step">
+            <span class="step-number">3</span>
+            <h3>حدد الورثة</h3>
+            <p>ضع علامة ✓ أمام كل وارث موجود، وأدخل عدد الأبناء والبنات والإخوة</p>
+        </div>
+
+        <div class="step">
+            <span class="step-number">4</span>
+            <h3>احسب المواريث</h3>
+            <p>اضغط على زر "احسب المواريث" وستظهر لك النتائج فوراً!</p>
+        </div>
+
+        <div class="step">
+            <span class="step-number">5</span>
+            <h3>اطلع على النتائج</h3>
+            <p>سترى جدولاً مفصلاً يوضح نصيب كل وارث مع التقرير الشرعي الكامل</p>
+        </div>
+
+        <div class="note" style="background: #d1ecf1; border-color: #0c5460;">
+            <strong>💡 نصيحة:</strong>
+            <p>جرّب الضغط على زر "مثال توضيحي" في البرنامج لرؤية كيفية العمل بمثال جاهز</p>
+        </div>
+
+        <h2 style="color: #667eea; margin-top: 40px;">📱 للمستخدمين المتقدمين:</h2>
+
+        <div class="step">
+            <span class="step-number">💻</span>
+            <h3>واجهة سطر الأوامر</h3>
+            <p>إذا كنت تعرف كيفية استخدام Terminal، يمكنك تشغيل البرنامج بالأمر:</p>
+            <code style="background: #2c3e50; color: #ecf0f1; padding: 10px; display: block; border-radius: 5px; margin-top: 10px;">
+                cd islamic-inheritance-calculator<br>
+                node src/cli.js
+            </code>
+        </div>
+
+        <div class="step">
+            <span class="step-number">🧪</span>
+            <h3>تشغيل الاختبارات</h3>
+            <p>للتأكد من صحة عمل البرنامج، يمكنك تشغيل الاختبارات:</p>
+            <code style="background: #2c3e50; color: #ecf0f1; padding: 10px; display: block; border-radius: 5px; margin-top: 10px;">
+                cd islamic-inheritance-calculator<br>
+                npm test
+            </code>
+        </div>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ddd;">
+
+        <div style="text-align: center; color: #666;">
+            <h3>الأساس الشرعي</h3>
+            <p style="font-size: 1.5em; line-height: 2; color: #764ba2;">
+                ﴿يُوصِيكُمُ اللَّهُ فِي أَوْلَادِكُمْ ۖ لِلذَّكَرِ مِثْلُ حَظِّ الْأُنثَيَيْنِ﴾
+            </p>
+            <p>سورة النساء - آية 11</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f8f9ff; border-radius: 10px;">
+            <p><strong>⚠️ تنويه:</strong></p>
+            <p>هذا البرنامج للاسترشاد فقط. يُنصح بمراجعة عالم شرعي متخصص للحالات المعقدة.</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; color: #999;">
+            <p>Islamic Inheritance Calculator © 2025</p>
+            <p>والله أعلم، وصلى الله على نبينا محمد</p>
+        </div>
+    </div>
+</body>
+</html>
