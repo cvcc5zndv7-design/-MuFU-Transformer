@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة وتصفية التركات</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #004a99;
+            --border-color: #dee2e6;
+            --background-color: #f8f9fa;
+            --text-color: #212529;
+            --header-bg: #f1f3f5;
+        }
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: auto;
+            position: relative;
+        }
+        .save-load-controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        .icon-btn {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: var(--primary-color);
+            transition: background-color 0.2s;
+        }
+        .icon-btn:hover { background-color: #e9ecef; }
+        .page-header { text-align: center; margin-bottom: 20px; }
+        .page-header h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin: 20px 0 10px 0;
+        }
+        .case-number-input {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .case-number-input input {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1.1em;
+            width: 300px;
+            text-align: center;
+        }
+        .section-box {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+        h2 {
+            font-size: 1.5em;
+            text-align: right;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: flex-end;
+        }
+        .input-group { display: flex; flex-direction: column; }
+        .input-group label { margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 74, 153, 0.25);
+        }
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn:hover { background-color: #003366; }
+        .btn-info { background-color: #0c63e4; } .btn-info:hover { background-color: #0a58ca; }
+        .btn-warning { background-color: #ffc107; color: #000; } .btn-warning:hover { background-color: #ffca2c; }
+        .btn-danger { background-color: #dc3545; } .btn-danger:hover { background-color: #bb2d3b; }
+        .btn-success { background-color: #28a745; } .btn-success:hover { background-color: #218838; }
+        .btn-main-action { font-size: 20px; padding: 15px; width: 100%; margin-top: 20px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        th, td { border: 1px solid var(--border-color); padding: 10px; text-align: center; }
+        th { background-color: var(--header-bg); color: var(--primary-color); font-weight: bold; }
+        #asset-fields-container {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 5px;
+            background-color: #fdfdfd;
+        }
+        #results-container .result-table-wrapper { margin-bottom: 30px; }
+        #results-container h3 {
+            text-align: right;
+            padding: 12px;
+            border-radius: 5px;
+            border-right: 5px solid var(--primary-color);
+            background-color: var(--header-bg);
+            color: #000;
+        }
+        .total-row {
+            background-color: var(--header-bg);
+            font-weight: bold;
+        }
+        .list-item-actions button { padding: 5px 10px; font-size: 14px; }
+        .heir-summary-box {
+            background-color: var(--header-bg);
+            border: 1px solid var(--border-color);
+            border-right: 5px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .heir-summary-box h3 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.5em;
+        }
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+
+    <div class="save-load-controls">
+        <label for="load-file" class="icon-btn" title="تحميل بيانات">📁</label>
+        <input type="file" id="load-file" accept=".json" style="display: none;" onchange="loadData(event)">
+        <button class="icon-btn" title="حفظ البيانات" onclick="saveData()">💾</button>
+    </div>
+
+    <div class="page-header">
+        <h1>نظام إدارة وتصفية التركات</h1>
+    </div>
+
+    <div class="case-number-input">
+        <input type="text" id="case-number" placeholder="أدخل رقم الدعوى">
+    </div>
+
+    <div class="section-box">
+        <h2>المرحلة 1: إدخال الورثة وحصصهم</h2>
+
+        <div id="heir-summary-box" style="display: none;">
+            </div>
+
+        <div class="input-grid" style="grid-template-columns: 2fr 2fr 1fr 1fr;">
+            <div class="input-group"><label for="heir-name">اسم الوارث</label><input type="text" id="heir-name"></div>
+            <div class="input-group"><label for="heir-kinship">صلة القرابة</label>
+                <select id="heir-kinship"></select> </div>
+            <div class="input-group"><label for="heir-shares">عدد الأسهم</label><input type="number" id="heir-shares" min="1"></div>
+            <button id="heir-add-btn" class="btn" onclick="addOrUpdateHeir()">إضافة وارث</button>
+        </div>
+        <div id="heirs-list"></div>
+    </div>
+
+    <div class="section-box">
+        <h2>إضافة الديون على التركة (إن وجدت)</h2>
+        <div class="input-grid" style="grid-template-columns: 3fr 1fr 1fr;">
+            <div class="input-group"><label>وصف الدين (لصالح...)</label><input type="text" id="debt-description"></div>
+            <div class="input-group"><label>المبلغ (درهم)</label><input type="number" id="debt-amount" min="0"></div>
+            <button class="btn" onclick="addDebt()">إضافة دين</button>
+        </div>
+        <div id="debts-list"></div>
+    </div>
+
+    <div class="section-box">
+        <h2>المرحلة 2: إضافة الممتلكات (التركة)</h2>
+        <div class="input-group">
+            <label for="asset-type-select">اختر نوع الممتلكات</label>
+            <select id="asset-type-select" onchange="updateAssetFields()">
+                <option value="">-- اختر نوع --</option>
+                <option value="real_estate">عقار</option>
+                <option value="vehicle">مركبة</option>
+                <option value="license_plate">لوحة مركبة</option>
+                <option value="phone_number">رقم هاتف</option>
+                <option value="jewelry">مجوهرات</option>
+                <option value="cash">أموال نقدية</option>
+                <option value="company_shares">أسهم شركة</option>
+            </select>
+        </div>
+        <div id="asset-fields-container" style="display:none;"></div>
+        <div id="assets-list"></div>
+    </div>
+
+    <div class="section-box">
+        <h2>إضافة التنازلات (إن وجدت)</h2>
+        <div class="input-grid" style="grid-template-columns: 1fr 1fr 2fr 1fr auto;">
+            <div class="input-group"><label>المتنازل (من)</label><select id="waiver-from"></select></div>
+            <div class="input-group"><label>المتنازل له (إلى)</label><select id="waiver-to" onchange="toggleWaiverDistribution()"></select></div>
+            <div class="input-group"><label>المتنازل عنه</label><select id="waiver-asset"></select></div>
+            <div class="input-group"><label>نسبة التنازل (%)</label><input type="number" id="waiver-percentage" min="1" max="100" value="100"></div>
+            <button class="btn" onclick="addWaiver()">إضافة تنازل</button>
+        </div>
+        <div id="waiver-distribution-options" style="display:none; margin-top:15px;" class="input-group">
+            <label>طريقة توزيع الحصة المتنازل عنها:</label>
+            <select id="waiver-distribution-method">
+                <option value="pro_rata">على حسب حصص الورثة</option>
+                <option value="equally">بالتساوي فيما بينهم</option>
+            </select>
+        </div>
+        <div id="waivers-list"></div>
+    </div>
+
+    <div class="section-box">
+        <h2>المرحلة النهائية: توزيع التركة</h2>
+        <button class="btn-main-action" onclick="distribute()">توزيع التركة وعرض النتائج</button>
+    </div>
+
+    <div id="results-container" class="section-box" style="display:none;">
+        <div class="export-buttons">
+             <button class="btn btn-success" onclick="exportToWord()">📄 تصدير كملف Word</button>
+             <button class="btn" onclick="exportToExcel()">📊 تصدير كملف Excel</button>
+             <button class="btn btn-info" onclick="exportToHTML()">🌐 تصدير كـ HTML</button>
+        </div>
+        </div>
+</div>
+
+
+<script>
+let heirs = [];
+let assets = [];
+let debts = [];
+let waivers = [];
+let editHeirIndex = null;
+
+const kinshipOptions = [
+    "زوج", "زوجة", "ابن", "بنت", "أب", "أم",
+    "جد (أب الأب)", "جدة (أم الأم)", "جدة (أم الأب)",
+    "ابن الابن", "بنت الابن", "ابن ابن الابن", "بنت ابن الابن",
+    "أخ شقيق", "أخت شقيقة", "أخ لأب", "أخت لأب", "أخ لأم", "أخت لأم",
+    "ابن أخ شقيق", "ابن أخ لأب", "ابن ابن أخ شقيق", "ابن ابن أخ لأب",
+    "عم شقيق", "عم لأب", "ابن عم شقيق", "ابن عم لأب",
+    "ابن ابن عم شقيق", "ابن ابن عم لأب", "معتق", "معتقة", "أخرى"
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+    const kinshipSelect = document.getElementById('heir-kinship');
+    kinshipOptions.forEach(option => {
+        kinshipSelect.innerHTML += `<option value="${option}">${option}</option>`;
+    });
+    renderAllLists();
+});
+
+// --- HEIRS MANAGEMENT ---
+function addOrUpdateHeir() {
+    const name = document.getElementById('heir-name').value.trim();
+    const kinship = document.getElementById('heir-kinship').value;
+    const shares = parseInt(document.getElementById('heir-shares').value);
+
+    if (!name || !kinship || isNaN(shares) || shares <= 0) {
+        alert('الرجاء تعبئة جميع حقول الوارث بعدد أسهم صحيح.');
+        return;
+    }
+
+    if (editHeirIndex !== null) {
+        if (heirs.some((h, i) => h.name === name && i !== editHeirIndex)) {
+             alert('اسم الوارث مكرر. الرجاء استخدام اسم مميز.');
+             return;
+        }
+        heirs[editHeirIndex] = { name, kinship, shares };
+    } else {
+        if (heirs.some(h => h.name === name)) {
+            alert('اسم الوارث مكرر. الرجاء استخدام اسم مميز.');
+            return;
+        }
+        heirs.push({ name, kinship, shares });
+    }
+
+    editHeirIndex = null;
+    document.getElementById('heir-name').value = '';
+    document.getElementById('heir-kinship').value = kinshipOptions[0];
+    document.getElementById('heir-shares').value = '';
+    document.getElementById('heir-add-btn').textContent = 'إضافة وارث';
+    document.getElementById('heir-add-btn').classList.remove('btn-warning');
+    renderHeirsList();
+}
+function editHeir(index) {
+    const heir = heirs[index];
+    document.getElementById('heir-name').value = heir.name;
+    document.getElementById('heir-kinship').value = heir.kinship;
+    document.getElementById('heir-shares').value = heir.shares;
+    document.getElementById('heir-add-btn').textContent = 'تحديث بيانات الوارث';
+    document.getElementById('heir-add-btn').classList.add('btn-warning');
+    editHeirIndex = index;
+    window.scrollTo({ top: document.getElementById('heir-add-btn').offsetTop - 100, behavior: 'smooth' });
+}
+function removeHeir(index) {
+    if (confirm(`هل أنت متأكد من حذف الوارث: ${heirs[index].name}؟`)) {
+        heirs.splice(index, 1);
+        renderHeirsList();
+    }
+}
+function renderHeirsList() {
+    const listDiv = document.getElementById('heirs-list');
+    const summaryBox = document.getElementById('heir-summary-box');
+    listDiv.innerHTML = '';
+    const totalShares = heirs.reduce((sum, heir) => sum + heir.shares, 0);
+
+    if (heirs.length === 0) {
+        summaryBox.style.display = 'none';
+        updateWaiverDropdowns();
+        return;
+    }
+
+    summaryBox.style.display = 'block';
+    summaryBox.innerHTML = `<h3>إجمالي أسهم الورثة: ${totalShares}</h3>`;
+
+    let tableHTML = `
+        <table id="heirs-table">
+            <thead><tr><th>اسم الوارث</th><th>صلة القرابة</th><th>عدد الأسهم</th><th>النسبة (%)</th><th>إجراء</th></tr></thead>
+            <tbody>`;
+
+    heirs.forEach((heir, index) => {
+        const percentage = totalShares > 0 ? ((heir.shares / totalShares) * 100) : 0;
+        heir.percentage = parseFloat(percentage);
+        tableHTML += `
+            <tr>
+                <td>${heir.name}</td>
+                <td>${heir.kinship}</td>
+                <td>${heir.shares}</td>
+                <td>${heir.percentage.toFixed(3)}%</td>
+                <td>
+                    <button class="btn btn-info btn-sm" onclick="editHeir(${index})">تعديل</button>
+                    <button class="btn btn-danger btn-sm" onclick="removeHeir(${index})">حذف</button>
+                </td>
+            </tr>`;
+    });
+
+    tableHTML += `
+            </tbody>
+            <tfoot class="total-row"><tr><td>المجموع</td><td></td><td>${totalShares}</td><td>100.000%</td><td></td></tr></tfoot>
+        </table>`;
+    listDiv.innerHTML = tableHTML;
+    updateWaiverDropdowns();
+}
+
+// --- DEBT MANAGEMENT ---
+function addDebt() {
+    const description = document.getElementById('debt-description').value.trim();
+    const amount = parseFloat(document.getElementById('debt-amount').value);
+    if (!description || isNaN(amount) || amount <= 0) {
+        alert('الرجاء إدخال وصف الدين ومبلغ صحيح.');
+        return;
+    }
+    debts.push({ description, amount });
+    document.getElementById('debt-description').value = '';
+    document.getElementById('debt-amount').value = '';
+    renderDebtsList();
+}
+function removeDebt(index) {
+    debts.splice(index, 1);
+    renderDebtsList();
+}
+function renderDebtsList() {
+    const listDiv = document.getElementById('debts-list');
+    listDiv.innerHTML = '';
+    if (debts.length === 0) return;
+    let totalDebts = 0;
+    let tableHTML = `<table id="debts-table"><thead><tr><th>وصف الدين</th><th>المبلغ (درهم)</th><th>إجراء</th></tr></thead><tbody>`;
+    debts.forEach((debt, index) => {
+        totalDebts += debt.amount;
+        tableHTML += `
+            <tr>
+                <td>${debt.description}</td>
+                <td>${debt.amount.toFixed(2)}</td>
+                <td><button class="btn btn-danger btn-sm" onclick="removeDebt(${index})">حذف</button></td>
+            </tr>`;
+    });
+    tableHTML += `</tbody><tfoot class="total-row"><tr><td>الإجمالي</td><td>${totalDebts.toFixed(2)}</td><td></td></tr></tfoot></table>`;
+    listDiv.innerHTML = tableHTML;
+}
+
+// --- ASSETS MANAGEMENT ---
+function updateAssetFields() {
+    const type = document.getElementById('asset-type-select').value;
+    const container = document.getElementById('asset-fields-container');
+    container.style.display = 'block';
+    let fieldsHTML = '';
+    const heirOptions = heirs.map(h => `<option value="${h.name}">${h.name}</option>`).join('');
+
+    switch (type) {
+        case 'real_estate':
+            fieldsHTML = `
+                <div class="input-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <div class="input-group"><label>نوع العقار</label><select id="property-type">
+                        <option>مزرعة</option><option>أرض</option><option>فيلا سكنية</option><option>بيت شعبي</option><option>شقة</option>
+                        <option>عزبة</option><option>عقار تجاري</option><option>أرض استثمارية</option><option>أرض صناعية</option><option>عقار ترفيهي</option>
+                    </select></div>
+                    <div class="input-group"><label>العنوان / رقم القسيمة</label><input type="text" id="property-address"></div>
+                    <div class="input-group"><label>نسبة تملك المورث (%)</label><input type="number" id="property-ownership" value="100" min="1" max="100"></div>
+                </div>`;
+            break;
+        case 'vehicle':
+            fieldsHTML = `<div class="input-grid">
+                <div class="input-group"><label>نوع المركبة</label><input type="text" id="vehicle-type" placeholder="مثال: تويوتا لاندكروزر"></div>
+                <div class="input-group"><label>رقمها</label><input type="text" id="vehicle-number"></div>
+                <div class="input-group"><label>سنة الصنع</label><input type="number" id="vehicle-year" min="1900" max="2050" placeholder="YYYY"></div>
+                </div>`;
+            break;
+        case 'license_plate':
+            fieldsHTML = `<div class="input-grid">
+                <div class="input-group"><label>صادرة من</label><select id="plate-emirate"><option>أبوظبي</option><option>دبي</option><option>الشارقة</option><option>عجمان</option><option>أم القيوين</option><option>الفجيرة</option></select></div>
+                <div class="input-group"><label>رقم اللوحة</label><input type="text" id="plate-number"></div>
+                <div class="input-group"><label>المتنازل له</label><select id="plate-assignee">${heirOptions}</select></div></div>`;
+            break;
+        case 'phone_number':
+             fieldsHTML = `<div class="input-grid">
+                <div class="input-group"><label>رقم الهاتف</label><input type="text" id="phone-number"></div>
+                <div class="input-group"><label>المتنازل له</label><input type="text" id="phone-assignee" placeholder="اسم الوارث أو شخص آخر"></div></div>`;
+            break;
+        case 'jewelry':
+            fieldsHTML = `<div class="input-grid">
+                <div class="input-group"><label>النوع</label><select id="jewelry-type"><option>ذهب</option><option>ألماس</option><option>فضة</option></select></div>
+                <div class="input-group"><label>الوزن (جرام/قيراط)</label><input type="number" id="jewelry-weight" min="0" step="0.01" oninput="calculateJewelryTotal()"></div>
+                <div class="input-group"><label>السعر للجرام/قيراط</label><input type="number" id="jewelry-price" min="0" step="0.01" oninput="calculateJewelryTotal()"></div>
+                <div class="input-group"><label>السعر الإجمالي</label><input type="number" id="jewelry-total" readonly style="background-color: #eee;"></div></div>`;
+            break;
+        case 'cash':
+            fieldsHTML = `<div class="input-grid"><div class="input-group"><label>المبلغ الإجمالي (درهم)</label><input type="number" id="cash-amount" min="0" step="0.01"></div></div>`;
+            break;
+        case 'company_shares':
+            fieldsHTML = `<div class="input-grid">
+                <div class="input-group"><label>اسم شركة الأسهم</label><input type="text" id="cs-company-name"></div>
+                <div class="input-group"><label>العدد الإجمالي للأسهم</label><input type="number" id="cs-total-shares" min="1"></div></div>`;
+            break;
+        default:
+            container.style.display = 'none';
+    }
+    container.innerHTML = fieldsHTML + (type ? `<br><button class="btn" onclick="addAsset()">إضافة للممتلكات</button>` : '');
+}
+function calculateJewelryTotal() {
+    const weight = parseFloat(document.getElementById('jewelry-weight').value) || 0;
+    const price = parseFloat(document.getElementById('jewelry-price').value) || 0;
+    document.getElementById('jewelry-total').value = (weight * price).toFixed(2);
+}
+function addAsset() {
+    const type = document.getElementById('asset-type-select').value;
+    let assetData = { type, id: Date.now() };
+    try {
+        switch (type) {
+            case 'real_estate':
+                if (!document.getElementById('property-address').value.trim()) throw new Error("Missing real estate address");
+                assetData = { ...assetData, propertyType: document.getElementById('property-type').value, address: document.getElementById('property-address').value.trim(), ownership: parseFloat(document.getElementById('property-ownership').value) }; break;
+            case 'vehicle':
+                if (!document.getElementById('vehicle-type').value.trim() || !document.getElementById('vehicle-number').value.trim() || !document.getElementById('vehicle-year').value) throw new Error("Missing vehicle details");
+                assetData = { ...assetData, vehicleType: document.getElementById('vehicle-type').value.trim(), number: document.getElementById('vehicle-number').value.trim(), year: document.getElementById('vehicle-year').value }; break;
+            case 'license_plate':
+                if (!document.getElementById('plate-number').value.trim() || !document.getElementById('plate-assignee').value) throw new Error("Missing license plate details");
+                assetData = { ...assetData, emirate: document.getElementById('plate-emirate').value, number: document.getElementById('plate-number').value.trim(), assignee: document.getElementById('plate-assignee').value }; break;
+            case 'phone_number':
+                if (!document.getElementById('phone-number').value.trim() || !document.getElementById('phone-assignee').value.trim()) throw new Error("Missing phone number details");
+                assetData = { ...assetData, number: document.getElementById('phone-number').value.trim(), assignee: document.getElementById('phone-assignee').value.trim() }; break;
+            case 'jewelry':
+                 if (!document.getElementById('jewelry-weight').value || !document.getElementById('jewelry-price').value || parseFloat(document.getElementById('jewelry-total').value) <= 0) throw new Error("Missing or invalid jewelry details");
+                 assetData = { ...assetData, jewelryType: document.getElementById('jewelry-type').value, weight: parseFloat(document.getElementById('jewelry-weight').value), pricePerUnit: parseFloat(document.getElementById('jewelry-price').value), totalPrice: parseFloat(document.getElementById('jewelry-total').value) }; break;
+            case 'cash':
+                 if (!document.getElementById('cash-amount').value || parseFloat(document.getElementById('cash-amount').value) <= 0) throw new Error("Missing or invalid cash amount");
+                 assetData = { ...assetData, amount: parseFloat(document.getElementById('cash-amount').value) }; break;
+            case 'company_shares':
+                 if (!document.getElementById('cs-company-name').value.trim() || !document.getElementById('cs-total-shares').value || parseInt(document.getElementById('cs-total-shares').value) <= 0) throw new Error("Missing or invalid company shares details");
+                 assetData = { ...assetData, company: document.getElementById('cs-company-name').value.trim(), total: parseInt(document.getElementById('cs-total-shares').value) }; break;
+        }
+    } catch(e) {
+        console.error(e);
+        alert(`خطأ في إدخال بيانات الممتلكات: ${e.message}. الرجاء التأكد من ملء جميع الحقول المطلوبة بشكل صحيح.`);
+        return;
+    }
+    assets.push(assetData);
+    renderAssetsList();
+    document.getElementById('asset-type-select').value = '';
+    updateAssetFields();
+}
+function removeAsset(index) {
+    if (confirm(`هل أنت متأكد من حذف: ${getAssetSummary(assets[index])}؟`)) {
+        assets.splice(index, 1);
+        renderAssetsList();
+    }
+}
+function renderAssetsList() {
+    const listDiv = document.getElementById('assets-list');
+    listDiv.innerHTML = '';
+    if (assets.length === 0) {
+        updateWaiverDropdowns();
+        return;
+    }
+    let tableHTML = `<table id="assets-table"><thead><tr><th>ملخص الممتلكات</th><th>إجراء</th></tr></thead><tbody>`;
+    assets.forEach((asset, index) => {
+        tableHTML += `
+            <tr>
+                <td style="text-align: right;">${getAssetSummary(asset)}</td>
+                <td><button class="btn btn-danger btn-sm" onclick="removeAsset(${index})">حذف</button></td>
+            </tr>`;
+    });
+    tableHTML += `</tbody></table>`;
+    listDiv.innerHTML = tableHTML;
+    updateWaiverDropdowns();
+}
+function getAssetSummary(asset) {
+    try {
+        switch (asset.type) {
+            case 'real_estate': return `عقار (${asset.ownership}%): ${asset.propertyType} - ${asset.address}`;
+            case 'vehicle': return `مركبة (سنة ${asset.year}): ${asset.vehicleType} - ${asset.number}`;
+            case 'license_plate': return `لوحة مركبة: ${asset.number} (${asset.emirate}) --> ${asset.assignee}`;
+            case 'phone_number': return `رقم هاتف: ${asset.number} --> ${asset.assignee}`;
+            case 'jewelry': return `مجوهرات: ${asset.jewelryType} (${asset.weight} جرام/قيراط) - القيمة: ${asset.totalPrice.toFixed(2)} درهم`;
+            case 'cash': return `أموال نقدية: ${asset.amount.toFixed(2)} درهم`;
+            case 'company_shares': return `أسهم شركة: ${asset.company} - العدد: ${asset.total}`;
+            default: return `ممتلكات (id: ${asset.id})`; // Fallback
+        }
+    } catch (e) {
+        console.error("Error getting asset summary for:", asset, e);
+        return "خطأ في عرض ملخص الأصل";
+    }
+}
+
+// --- WAIVERS MANAGEMENT ---
+function updateWaiverDropdowns() {
+    const fromSelect = document.getElementById('waiver-from');
+    const toSelect = document.getElementById('waiver-to');
+    const assetSelect = document.getElementById('waiver-asset');
+    const currentFrom = fromSelect.value;
+    const currentTo = toSelect.value;
+    const currentAsset = assetSelect.value;
+
+    const heirOptions = heirs.map(h => `<option value="${h.name}">${h.name}</option>`).join('');
+    fromSelect.innerHTML = heirOptions;
+    toSelect.innerHTML = heirOptions + '<option value="all_heirs">جميع الورثة (الباقين)</option>';
+    const assetOptions = assets.map(a => `<option value="${a.id}">${getAssetSummary(a)}</option>`).join('');
+    assetSelect.innerHTML = `<option value="all_assets">جميع الممتلكات</option>` + assetOptions;
+
+    fromSelect.value = currentFrom;
+    toSelect.value = currentTo;
+    assetSelect.value = currentAsset;
+    toggleWaiverDistribution();
+}
+function toggleWaiverDistribution() {
+    const distOptions = document.getElementById('waiver-distribution-options');
+    distOptions.style.display = document.getElementById('waiver-to').value === 'all_heirs' ? 'block' : 'none';
+}
+function addWaiver() {
+    const from = document.getElementById('waiver-from').value;
+    const to = document.getElementById('waiver-to').value;
+    const assetId = document.getElementById('waiver-asset').value;
+    const percentage = parseFloat(document.getElementById('waiver-percentage').value);
+    const distribution = document.getElementById('waiver-distribution-method').value;
+    if (!from || !to || !assetId || isNaN(percentage) || percentage < 1 || percentage > 100) {
+        alert("الرجاء ملء جميع حقول التنازل بنسبة صحيحة (1-100).");
+        return;
+    }
+    if (from === to && to !== 'all_heirs') {
+        alert("لا يمكن للوارث أن يتنازل لنفسه.");
+        return;
+    }
+    waivers.push({ from, to, assetId, percentage, distribution });
+    renderWaiversList();
+}
+function removeWaiver(index) {
+    waivers.splice(index, 1);
+    renderWaiversList();
+}
+function renderWaiversList() {
+    const listDiv = document.getElementById('waivers-list');
+    listDiv.innerHTML = '';
+    if (waivers.length === 0) return;
+    let tableHTML = `<table id="waivers-table"><thead><tr><th>المتنازل (من)</th><th>المتنازل له (إلى)</th><th>المتنازل عنه</th><th>النسبة</th><th>إجراء</th></tr></thead><tbody>`;
+    waivers.forEach((w, index) => {
+        const assetObj = assets.find(a => a.id == w.assetId);
+        const assetName = w.assetId === 'all_assets' ? 'جميع الممتلكات' : (assetObj ? getAssetSummary(assetObj) : 'ممتلكات محذوفة');
+        const toName = w.to === 'all_heirs' ? 'جميع الورثة' : w.to;
+        tableHTML += `
+            <tr>
+                <td>${w.from}</td>
+                <td>${toName}</td>
+                <td style="text-align: right;">${assetName}</td>
+                <td>${w.percentage}%</td>
+                <td><button class="btn btn-danger btn-sm" onclick="removeWaiver(${index})">حذف</button></td>
+            </tr>`;
+    });
+    tableHTML += `</tbody></table>`;
+    listDiv.innerHTML = tableHTML;
+}
+
+// --- SAVE/LOAD & EXPORT LOGIC ---
+function saveData() {
+    if (heirs.length === 0) {
+        alert("لا توجد بيانات لحفظها.");
+        return;
+    }
+    const caseNumber = document.getElementById('case-number').value;
+    const data = { caseNumber, heirs, assets, debts, waivers };
+    const dataStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([dataStr], {type: "application/json;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tarika_data_${caseNumber || new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+function loadData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            document.getElementById('case-number').value = data.caseNumber || '';
+            heirs = data.heirs || [];
+            assets = data.assets || [];
+            debts = data.debts || [];
+            waivers = data.waivers || [];
+            renderAllLists();
+        } catch (err) {
+            alert("خطأ في قراءة الملف. تأكد من أنه ملف JSON صحيح تم حفظه من هذا البرنامج.");
+            console.error(err);
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = null;
+}
+function renderAllLists() {
+    renderHeirsList();
+    renderAssetsList();
+    renderDebtsList();
+    renderWaiversList();
+    document.getElementById('results-container').style.display = 'none';
+}
+
+async function exportToWord() {
+    const resultsContainer = document.getElementById('results-container');
+    if (resultsContainer.style.display === 'none') {
+        alert('الرجاء توزيع التركة أولاً قبل التصدير.');
+        return;
+    }
+
+    const caseNumber = document.getElementById('case-number').value;
+    const { Document, Paragraph, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle, TextRun, HeadingLevel } = docx;
+
+    // Helper function to create table cells
+    function createCell(text, options = {}) {
+        return new TableCell({
+            children: [new Paragraph({
+                text: text,
+                alignment: options.alignment || AlignmentType.CENTER,
+                bidirectional: true,
+            })],
+            width: options.width || { size: 100 / (options.columns || 1), type: WidthType.PERCENTAGE },
+            shading: options.shading,
+        });
+    }
+
+    // Helper function to create header cells
+    function createHeaderCell(text, columns = 1) {
+        return createCell(text, {
+            columns,
+            shading: { fill: "f1f3f5" }
+        });
+    }
+
+    const documentChildren = [];
+
+    // Title
+    documentChildren.push(
+        new Paragraph({
+            text: "تقرير توزيع التركة",
+            heading: HeadingLevel.HEADING_1,
+            alignment: AlignmentType.CENTER,
+            bidirectional: true,
+        })
+    );
+
+    // Case number
+    if (caseNumber) {
+        documentChildren.push(
+            new Paragraph({
+                text: `رقم الدعوى: ${caseNumber}`,
+                heading: HeadingLevel.HEADING_2,
+                alignment: AlignmentType.RIGHT,
+                bidirectional: true,
+                spacing: { before: 200, after: 200 }
+            })
+        );
+    }
+
+    // Heirs table section
+    documentChildren.push(
+        new Paragraph({
+            text: "جدول حصص الورثة الأصلية",
+            heading: HeadingLevel.HEADING_2,
+            alignment: AlignmentType.RIGHT,
+            bidirectional: true,
+            spacing: { before: 400, after: 200 }
+        })
+    );
+
+    // Create heirs table
+    const totalShares = heirs.reduce((sum, h) => sum + h.shares, 0);
+    const heirsTableRows = [
+        new TableRow({
+            children: [
+                createHeaderCell("اسم الوارث", 4),
+                createHeaderCell("صلة القرابة", 4),
+                createHeaderCell("عدد الأسهم", 4),
+                createHeaderCell("النسبة (%)", 4),
+            ],
+            tableHeader: true,
+        })
+    ];
+
+    heirs.forEach(heir => {
+        heirsTableRows.push(
+            new TableRow({
+                children: [
+                    createCell(heir.name, { columns: 4 }),
+                    createCell(heir.kinship, { columns: 4 }),
+                    createCell(String(heir.shares), { columns: 4 }),
+                    createCell(heir.percentage.toFixed(3) + '%', { columns: 4 }),
+                ]
+            })
+        );
+    });
+
+    // Total row
+    heirsTableRows.push(
+        new TableRow({
+            children: [
+                createCell("المجموع", { columns: 4, shading: { fill: "f1f3f5" } }),
+                createCell("", { columns: 4, shading: { fill: "f1f3f5" } }),
+                createCell(String(totalShares), { columns: 4, shading: { fill: "f1f3f5" } }),
+                createCell("100.000%", { columns: 4, shading: { fill: "f1f3f5" } }),
+            ]
+        })
+    );
+
+    documentChildren.push(
+        new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: heirsTableRows,
+        })
+    );
+
+    // Debts table if exists
+    if (debts.length > 0) {
+        documentChildren.push(
+            new Paragraph({
+                text: "جدول الديون على التركة",
+                heading: HeadingLevel.HEADING_2,
+                alignment: AlignmentType.RIGHT,
+                bidirectional: true,
+                spacing: { before: 400, after: 200 }
+            })
+        );
+
+        const debtsTableRows = [
+            new TableRow({
+                children: [
+                    createHeaderCell("وصف الدين", 2),
+                    createHeaderCell("المبلغ (درهم)", 2),
+                ],
+                tableHeader: true,
+            })
+        ];
+
+        let totalDebts = 0;
+        debts.forEach(debt => {
+            totalDebts += debt.amount;
+            debtsTableRows.push(
+                new TableRow({
+                    children: [
+                        createCell(debt.description, { columns: 2, alignment: AlignmentType.RIGHT }),
+                        createCell(debt.amount.toFixed(2), { columns: 2 }),
+                    ]
+                })
+            );
+        });
+
+        debtsTableRows.push(
+            new TableRow({
+                children: [
+                    createCell("الإجمالي", { columns: 2, shading: { fill: "f1f3f5" } }),
+                    createCell(totalDebts.toFixed(2), { columns: 2, shading: { fill: "f1f3f5" } }),
+                ]
+            })
+        );
+
+        documentChildren.push(
+            new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                rows: debtsTableRows,
+            })
+        );
+    }
+
+    // Results tables
+    const tables = resultsContainer.querySelectorAll('.result-table-wrapper');
+    tables.forEach((wrapper) => {
+        if (wrapper.querySelector('#result-table-debts')) return; // Skip debts table as we already added it
+
+        const title = wrapper.querySelector('h3').textContent;
+        const table = wrapper.querySelector('table');
+
+        documentChildren.push(
+            new Paragraph({
+                text: title,
+                heading: HeadingLevel.HEADING_2,
+                alignment: AlignmentType.RIGHT,
+                bidirectional: true,
+                spacing: { before: 400, after: 200 }
+            })
+        );
+
+        const rows = Array.from(table.rows);
+        const wordTableRows = [];
+
+        rows.forEach((row, rowIndex) => {
+            const cells = Array.from(row.cells);
+            const isHeader = row.parentElement.tagName === 'THEAD';
+            const isFooter = row.parentElement.tagName === 'TFOOT';
+
+            const wordCells = cells.map(cell => {
+                const cellText = cell.textContent.trim();
+                const options = {
+                    columns: cells.length,
+                    alignment: AlignmentType.CENTER
+                };
+
+                if (isHeader || isFooter) {
+                    options.shading = { fill: "f1f3f5" };
+                }
+
+                // Right align for text-heavy cells
+                if (cell.style.textAlign === 'right' || cellText.length > 50) {
+                    options.alignment = AlignmentType.RIGHT;
+                }
+
+                return createCell(cellText, options);
+            });
+
+            wordTableRows.push(
+                new TableRow({
+                    children: wordCells,
+                    tableHeader: isHeader,
+                })
+            );
+        });
+
+        documentChildren.push(
+            new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                rows: wordTableRows,
+            })
+        );
+    });
+
+    // Create document
+    const doc = new Document({
+        sections: [{
+            properties: {
+                page: {
+                    rightToLeft: true,
+                }
+            },
+            children: documentChildren,
+        }]
+    });
+
+    // Generate and download
+    const blob = await docx.Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `تقرير_تركة_${caseNumber || 'بدون_رقم'}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function exportToExcel() {
+    const resultsContainer = document.getElementById('results-container');
+    if (resultsContainer.style.display === 'none') {
+        alert('الرجاء توزيع التركة أولاً قبل التصدير.');
+        return;
+    }
+    const caseNumber = document.getElementById('case-number').value;
+    const wb = XLSX.utils.book_new();
+
+    // ورقة الورثة (بدون عمود الإجراء)
+    const heirsTable = document.getElementById('heirs-table');
+    if (heirsTable) {
+        const tableCopy = heirsTable.cloneNode(true);
+        Array.from(tableCopy.rows).forEach(row => {
+            if(row.cells.length > 4 && row.parentElement.tagName !== 'TFOOT') { // استبعاد الصف السفلي أيضاً
+                 row.deleteCell(-1);
+            } else if (row.cells.length > 4 && row.parentElement.tagName === 'TFOOT') {
+                 row.deleteCell(-1); // حذف الخلية الخامسة الفارغة في الأسفل
+            }
+        });
+        const wsHeirs = XLSX.utils.table_to_sheet(tableCopy);
+        XLSX.utils.book_append_sheet(wb, wsHeirs, "حصص الورثة");
+    }
+
+    // ورقة الديون (بدون عمود الإجراء)
+    const debtsTable = document.getElementById('debts-table');
+    if (debtsTable) {
+        const tableCopy = debtsTable.cloneNode(true);
+        Array.from(tableCopy.rows).forEach(row => {
+             if(row.cells.length > 2 && row.parentElement.tagName === 'TBODY') {
+                 row.deleteCell(-1);
+             } else if (row.cells.length > 2 && row.parentElement.tagName === 'TFOOT') {
+                 row.deleteCell(-1);
+             }
+        });
+        const wsDebts = XLSX.utils.table_to_sheet(tableCopy);
+        XLSX.utils.book_append_sheet(wb, wsDebts, "الديون");
+    }
+
+    // أوراق جداول النتائج
+    const tables = resultsContainer.querySelectorAll('.result-table-wrapper');
+    tables.forEach((wrapper, index) => {
+        if (wrapper.querySelector('#result-table-debts')) return; // تخطي جدول الديون
+
+        const title = wrapper.querySelector('h3').textContent.replace(/[/\\?*\[\]:]/g, '').substring(0, 30);
+        const table = wrapper.querySelector('table');
+        const ws = XLSX.utils.table_to_sheet(table);
+        let sheetName = title || `جدول_${index + 1}`;
+        let counter = 1;
+        while(wb.SheetNames.includes(sheetName)){
+            sheetName = `${title.substring(0, 28 - String(counter).length)}_${counter}`;
+            counter++;
+        }
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    });
+    XLSX.writeFile(wb, `تقرير_تركة_${caseNumber || 'بدون_رقم'}.xlsx`);
+}
+
+function exportToHTML() {
+    const resultsContainer = document.getElementById('results-container');
+    if (resultsContainer.style.display === 'none') {
+        alert('الرجاء توزيع التركة أولاً قبل التصدير.');
+        return;
+    }
+    const caseNumber = document.getElementById('case-number').value;
+
+    const resultsClone = resultsContainer.cloneNode(true);
+    resultsClone.querySelector('div:first-child').remove();
+    const resultsHTML = resultsClone.innerHTML;
+
+    // إضافة جدول الورثة الأصلي للتقرير
+    const heirsTableHTML = document.getElementById('heirs-list').innerHTML;
+
+    const fullHTML = `
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <title>تقرير توزيع تركة ${caseNumber || ''}</title>
+            <style>
+                body { font-family: 'Tahoma', 'Arial', sans-serif; direction: rtl; padding: 20px; margin: 0; font-size: 10pt; } /* تصغير الخط قليلاً */
+                .section-box { padding: 15px; border: 1px solid #ccc; margin-bottom: 20px; border-radius: 5px; }
+                h1, h2, h3 { color: #004a99; text-align: right; }
+                h1 { text-align: center; border-bottom: 2px solid #004a99; padding-bottom: 10px; margin-top: 0; }
+                h2 { border-bottom: 1px solid #eee; padding-bottom: 5px;}
+                h3 { background-color: #f1f3f5; padding: 8px; border-right: 4px solid #004a99; border-radius: 3px;}
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 9pt; } /* تصغير خط الجدول */
+                th, td { border: 1px solid #ccc; padding: 6px; text-align: center; } /* تصغير الحشو */
+                th { background-color: #f1f3f5; color: #004a99; font-weight: bold; }
+                .total-row { background-color: #f1f3f5; font-weight: bold; }
+                .result-table-wrapper { page-break-inside: avoid; }
+                /* إخفاء عمود الإجراء في جدول الورثة عند الطباعة */
+                #heirs-table th:last-child, #heirs-table td:last-child { display: none; }
+                #debts-table th:last-child, #debts-table td:last-child { display: none; }
+            </style>
+        </head>
+        <body>
+            <h1>تقرير توزيع التركة</h1>
+            ${caseNumber ? `<h2>رقم الدعوى: ${caseNumber}</h2>` : ''}
+
+            <div class="section-box">
+                <h2>جدول حصص الورثة الأصلية</h2>
+                ${heirsTableHTML}
+            </div>
+
+            <div class="section-box">
+                ${resultsHTML}
+            </div>
+        </body>
+        </html>
+    `;
+
+    const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `تقرير_تركة_${caseNumber || 'بدون_رقم'}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+
+// --- DISTRIBUTION LOGIC (THE ENGINE) ---
+function distribute() {
+    if (heirs.length === 0) { alert('الرجاء إدخال الورثة أولاً.'); return; }
+    if (assets.length === 0 && debts.length === 0) { alert('الرجاء إدخال الممتلكات أو الديون أولاً.'); return; }
+
+    const resultsContainer = document.getElementById('results-container');
+    resultsContainer.innerHTML = `
+        <div class="export-buttons">
+             <button class="btn btn-success" onclick="exportToWord()">📄 تصدير كملف Word</button>
+             <button class="btn" onclick="exportToExcel()">📊 تصدير كملف Excel</button>
+             <button class="btn btn-info" onclick="exportToHTML()">🌐 تصدير كـ HTML</button>
+        </div>`;
+    resultsContainer.style.display = 'block';
+
+    // --- START: FINAL WAIVER LOGIC (Two-Pass) ---
+    let finalHeirs = JSON.parse(JSON.stringify(heirs));
+    let totalShares = finalHeirs.reduce((sum, h) => sum + h.shares, 0);
+    finalHeirs.forEach(h => h.percentage = totalShares > 0 ? (h.shares / totalShares) * 100 : 0);
+
+    const allAssetWaivers = waivers.filter(w => w.assetId === 'all_assets');
+    const fullyWaivingNames = allAssetWaivers.filter(w => w.percentage === 100).map(w => w.from);
+
+    let waiverPool = { pro_rata: 0, equally: 0 };
+    let specificWaivers = [];
+
+    // المرحلة 1: تجميع التنازلات (عن جميع الممتلكات)
+    allAssetWaivers.forEach(w => {
+        const fromHeir = finalHeirs.find(h => h.name === w.from);
+        if (!fromHeir || fromHeir.percentage <= 0) return;
+
+        // استخدام النسبة الأصلية كأساس لحساب مقدار التنازل
+        const originalFromHeir = heirs.find(oh => oh.name === w.from);
+        const basePercentage = originalFromHeir ? originalFromHeir.percentage : 0;
+        const waiverAmount = (basePercentage * w.percentage / 100);
+
+        const actualWaiver = Math.min(waiverAmount, fromHeir.percentage);
+        fromHeir.percentage -= actualWaiver;
+
+        if (w.to === 'all_heirs') {
+            if (w.distribution === 'pro_rata') {
+                waiverPool.pro_rata += actualWaiver;
+            } else {
+                waiverPool.equally += actualWaiver;
+            }
+        } else {
+            specificWaivers.push({ to: w.to, amount: actualWaiver });
+        }
+    });
+
+    // المرحلة 2: التوزيع
+    const recipients = finalHeirs.filter(h => !fullyWaivingNames.includes(h.name));
+
+    // 2.1 توزيع التنازلات المحددة
+    specificWaivers.forEach(sw => {
+        const toHeir = recipients.find(h => h.name === sw.to);
+        if (toHeir) {
+            toHeir.percentage += sw.amount;
+        } else {
+             if(fullyWaivingNames.includes(sw.to)){
+                 waiverPool.pro_rata += sw.amount;
+             }
+        }
+    });
+
+    // 2.2 توزيع الأرصدة العامة (pro_rata و equally)
+    if (recipients.length > 0) {
+        // توزيع رصيد "حسب الحصص"
+        if (waiverPool.pro_rata > 0) {
+            const recipientTotalShares = recipients.reduce((sum, h) => {
+                const originalHeir = heirs.find(oh => oh.name === h.name);
+                return sum + (originalHeir ? originalHeir.shares : 0);
+            }, 0);
+
+            if (recipientTotalShares > 0) {
+                recipients.forEach(h => {
+                    const originalHeir = heirs.find(oh => oh.name === h.name);
+                    const ratio = (originalHeir ? originalHeir.shares : 0) / recipientTotalShares;
+                    h.percentage += (waiverPool.pro_rata * ratio);
+                });
+            } else {
+                 recipients.forEach(h => h.percentage += (waiverPool.pro_rata / recipients.length));
+            }
+        }
+
+        // توزيع رصيد "بالتساوي"
+        if (waiverPool.equally > 0) {
+            const amountPerHeir = waiverPool.equally / recipients.length;
+            recipients.forEach(h => h.percentage += amountPerHeir);
+        }
+    }
+
+    // تصفير حصص المتنازلين بالكامل بشكل نهائي
+    finalHeirs.forEach(h => {
+        if (fullyWaivingNames.includes(h.name)) {
+            h.percentage = 0;
+        }
+        if (h.percentage < 0.00001) h.percentage = 0;
+    });
+
+    // إعادة ضبط المجموع الكلي ليكون 100%
+    const finalTotalPercentage = finalHeirs.reduce((sum, h) => sum + h.percentage, 0);
+    if (finalTotalPercentage > 0 && Math.abs(finalTotalPercentage - 100) > 0.001) {
+        const correctionFactor = 100 / finalTotalPercentage;
+        finalHeirs.forEach(h => h.percentage *= correctionFactor);
+        finalHeirs.forEach(h => { if (fullyWaivingNames.includes(h.name)) h.percentage = 0; });
+    }
+    // --- END: FINAL WAIVER LOGIC ---
+
+
+    // عرض جدول الديون
+    if (debts.length > 0) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'result-table-wrapper';
+        let totalDebts = 0;
+        let content = `<h3>جدول الديون على التركة</h3><table id="result-table-debts"><thead><tr><th>وصف الدين</th><th>المبلغ (درهم)</th></tr></thead><tbody>`;
+        debts.forEach(d => {
+            totalDebts += d.amount;
+            content += `<tr><td>${d.description}</td><td>${d.amount.toFixed(2)}</td></tr>`;
+        });
+        content += `</tbody><tfoot class="total-row"><tr><td>الإجمالي</td><td>${totalDebts.toFixed(2)}</td></tr></tfoot></table>`;
+        wrapper.innerHTML = content;
+        resultsContainer.appendChild(wrapper);
+    }
+
+    // عرض جداول الممتلكات
+    assets.forEach((asset, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'result-table-wrapper';
+        let content = '';
+        const title = getAssetSummary(asset);
+        const tableId = `result-table-asset-${index}`;
+        let totalPercentageDisplay = 0;
+
+        switch (asset.type) {
+            case 'real_estate':
+                content = `<h3>${title}</h3><table id="${tableId}"><thead><tr><th>اسم الوارث</th><th>صلة القرابة</th><th>حصته من العقار (%)</th></tr></thead><tbody>`;
+                let totalOwnership = 0;
+                finalHeirs.forEach(h => {
+                    const finalOwnership = (asset.ownership * h.percentage / 100);
+                    totalOwnership += finalOwnership;
+                    content += `<tr><td>${h.name}</td><td>${h.kinship}</td><td>${finalOwnership.toFixed(3)}%</td></tr>`;
+                });
+                content += `</tbody><tfoot class="total-row"><tr><td>المجموع</td><td></td><td>${totalOwnership.toFixed(3)}%</td></tr></tfoot></table>`;
+                break;
+
+            case 'vehicle':
+                content = `<h3>${title}</h3><table id="${tableId}"><thead><tr><th>اسم الوارث</th><th>صلة القرابة</th><th>نصيبه (%)</th></tr></thead><tbody>`;
+                totalPercentageDisplay = 0;
+                finalHeirs.forEach(h => {
+                    totalPercentageDisplay += h.percentage;
+                    content += `<tr><td>${h.name}</td><td>${h.kinship}</td><td>${h.percentage.toFixed(3)}%</td></tr>`;
+                });
+                content += `</tbody><tfoot class="total-row"><tr><td>المجموع</td><td></td><td>${totalPercentageDisplay.toFixed(3)}%</td></tr></tfoot></table>`;
+                break;
+
+            case 'jewelry':
+                content = `<h3>${title}</h3><table id="${tableId}"><thead><tr><th>اسم الوارث</th><th>صلة القرابة</th><th>نصيبه (%)</th><th>حصته المالية (درهم)</th></tr></thead><tbody>`;
+                let totalValue = 0;
+                totalPercentageDisplay = 0;
+                finalHeirs.forEach(h => {
+                    const cashShare = (asset.totalPrice * h.percentage / 100);
+                    totalValue += cashShare;
+                    totalPercentageDisplay += h.percentage;
+                    content += `<tr><td>${h.name}</td><td>${h.kinship}</td><td>${h.percentage.toFixed(3)}%</td><td>${cashShare.toFixed(2)}</td></tr>`;
+                });
+                content += `</tbody><tfoot class="total-row"><tr><td>المجموع</td><td></td><td>${totalPercentageDisplay.toFixed(3)}%</td><td>${totalValue.toFixed(2)}</td></tr></tfoot></table>`;
+                break;
+
+            case 'cash':
+                const totalInFils = Math.round(asset.amount * 100);
+                let distributedFils = 0;
+                let rows = [];
+                totalPercentageDisplay = 0;
+                finalHeirs.forEach(h => {
+                    const shareInFils = Math.floor(totalInFils * h.percentage / 100);
+                    distributedFils += shareInFils;
+                    totalPercentageDisplay += h.percentage;
+                    rows.push(`<tr><td>${h.name}</td><td>${h.kinship}</td><td>${h.percentage.toFixed(3)}%</td><td>${(shareInFils / 100).toFixed(2)}</td></tr>`);
+                });
+                const remainingFils = totalInFils - distributedFils;
+
+                content = `<h3>أموال نقدية (المبلغ: ${asset.amount.toFixed(2)} درهم)</h3><table id="${tableId}">
+                    <thead><tr><th>اسم الوارث</th><th>صلة القرابة</th><th>نصيبه (%)</th><th>حصته المالية (درهم)</th></tr></thead><tbody>${rows.join('')}</tbody>
+                    <tfoot class="total-row">
+                    <tr><td>المجموع الموزع</td><td></td><td>${totalPercentageDisplay.toFixed(3)}%</td><td>${(distributedFils / 100).toFixed(2)}</td></tr>
+                    <tr><td>المتبقي (كسور غير موزعة)</td><td></td><td></td><td>${(remainingFils / 100).toFixed(2)}</td></tr>
+                    </tfoot></table>`;
+                break;
+
+            case 'company_shares':
+                let distributedShares = 0;
+                let shareRows = [];
+                totalPercentageDisplay = 0;
+                finalHeirs.forEach(h => {
+                    const shareCount = Math.floor(asset.total * h.percentage / 100);
+                    distributedShares += shareCount;
+                    totalPercentageDisplay += h.percentage;
+                    shareRows.push(`<tr><td>${h.name}</td><td>${h.kinship}</td><td>${h.percentage.toFixed(3)}%</td><td>${shareCount}</td></tr>`);
+                });
+                const remainingShares = asset.total - distributedShares;
+
+                content = `<h3>أسهم شركة ${asset.company} (الإجمالي: ${asset.total} سهم)</h3><table id="${tableId}">
+                    <thead><tr><th>اسم الوارث</th><th>صلة القرابة</th><th>نصيبه (%)</th><th>حصته (عدد أسهم صحيح)</th></tr></thead><tbody>${shareRows.join('')}</tbody>
+                    <tfoot class="total-row">
+                    <tr><td>الأسهم الموزعة</td><td></td><td>${totalPercentageDisplay.toFixed(3)}%</td><td>${distributedShares}</td></tr>
+                    <tr><td>الأسهم المتبقية (غير موزعة)</td><td></td><td></td><td>${remainingShares}</td></tr>
+                    </tfoot></table>`;
+                break;
+
+            case 'license_plate':
+            case 'phone_number':
+                content = `<h3>${title}</h3><table id="${tableId}"><tbody>
+                    <tr class="total-row"><td style="font-weight:bold;">الحالة</td><td style="text-align: right;">تم تخصيصها</td></tr>
+                    <tr><td style="font-weight:bold;">المتنازل له / المخصص له</td><td style="text-align: right;">${asset.assignee}</td></tr>
+                    </tbody></table>`;
+                break;
+        }
+        wrapper.innerHTML = content;
+        resultsContainer.appendChild(wrapper);
+    });
+
+    // الانتقال إلى النتائج
+    window.scrollTo({ top: resultsContainer.offsetTop - 20, behavior: 'smooth' });
+}
+
+</script>
+</body>
+</html>
