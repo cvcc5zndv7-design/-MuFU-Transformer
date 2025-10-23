@@ -1,0 +1,20 @@
+{
+  "name": "islamic-inheritance-calculator",
+  "version": "1.0.0",
+  "description": "برنامج حساب المواريث الشرعية الإسلامية - Islamic Inheritance Calculator",
+  "main": "src/inheritance-calculator.js",
+  "scripts": {
+    "test": "node tests/test-runner.js",
+    "start": "node src/cli.js"
+  },
+  "keywords": [
+    "islamic",
+    "inheritance",
+    "فرائض",
+    "مواريث",
+    "sharia",
+    "calculator"
+  ],
+  "author": "",
+  "license": "MIT"
+}

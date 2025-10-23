@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة المواريث الشرعية | Islamic Inheritance Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>حاسبة المواريث الشرعية</h1>
+            <p class="subtitle">وفقاً لأحكام الشريعة الإسلامية من القرآن والسنة</p>
+        </header>
+
+        <div class="main-content">
+            <!-- قسم الإدخال -->
+            <section class="input-section">
+                <h2>بيانات الورثة</h2>
+
+                <!-- التركة -->
+                <div class="form-group estate-input">
+                    <label for="estate">التركة (بالريال):</label>
+                    <input type="number" id="estate" placeholder="مثال: 100000" value="100000" min="0" step="1000">
+                </div>
+
+                <!-- الزوجان -->
+                <div class="heirs-category">
+                    <h3>الزوجان</h3>
+                    <div class="heirs-grid">
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="husband" name="husband">
+                            <label for="husband">زوج</label>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="wife" name="wife">
+                            <label for="wife">زوجة</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الوالدان -->
+                <div class="heirs-category">
+                    <h3>الوالدان والأجداد</h3>
+                    <div class="heirs-grid">
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="father" name="father">
+                            <label for="father">أب</label>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="mother" name="mother">
+                            <label for="mother">أم</label>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="grandfather" name="grandfather">
+                            <label for="grandfather">جد</label>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="grandmother" name="grandmother">
+                            <label for="grandmother">جدة</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الأولاد -->
+                <div class="heirs-category">
+                    <h3>الأولاد</h3>
+                    <div class="heirs-grid">
+                        <div class="form-group">
+                            <label for="sons">عدد الأبناء:</label>
+                            <input type="number" id="sons" name="sons" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="daughters">عدد البنات:</label>
+                            <input type="number" id="daughters" name="daughters" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="sonsDaughters">عدد بنات الابن:</label>
+                            <input type="number" id="sonsDaughters" name="sonsDaughters" min="0" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الإخوة -->
+                <div class="heirs-category">
+                    <h3>الإخوة والأخوات</h3>
+                    <div class="heirs-grid">
+                        <div class="form-group">
+                            <label for="fullBrothers">إخوة أشقاء:</label>
+                            <input type="number" id="fullBrothers" name="fullBrothers" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="fullSisters">أخوات شقيقات:</label>
+                            <input type="number" id="fullSisters" name="fullSisters" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="paternalBrothers">إخوة لأب:</label>
+                            <input type="number" id="paternalBrothers" name="paternalBrothers" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="paternalSisters">أخوات لأب:</label>
+                            <input type="number" id="paternalSisters" name="paternalSisters" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="maternalBrothers">إخوة لأم:</label>
+                            <input type="number" id="maternalBrothers" name="maternalBrothers" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="maternalSisters">أخوات لأم:</label>
+                            <input type="number" id="maternalSisters" name="maternalSisters" min="0" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- أزرار -->
+                <div class="button-group">
+                    <button onclick="calculateInheritance()" class="btn-calculate">احسب المواريث</button>
+                    <button onclick="resetForm()" class="btn-reset">إعادة تعيين</button>
+                    <button onclick="loadExample()" class="btn-example">مثال توضيحي</button>
+                </div>
+            </section>
+
+            <!-- قسم النتائج -->
+            <section class="results-section" id="results" style="display: none;">
+                <h2>نتائج التوزيع</h2>
+
+                <!-- معلومات عامة -->
+                <div class="info-box">
+                    <div class="info-row">
+                        <span class="info-label">التركة الإجمالية:</span>
+                        <span class="info-value" id="totalEstate">0</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">المبلغ الموزع:</span>
+                        <span class="info-value" id="totalDistributed">0</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">أصل المسألة:</span>
+                        <span class="info-value" id="denominator">0</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">نوع المسألة:</span>
+                        <span class="info-value" id="caseType">عادية</span>
+                    </div>
+                </div>
+
+                <!-- جدول التوزيع -->
+                <div class="distribution-table">
+                    <h3>توزيع الأنصبة</h3>
+                    <table id="distributionTable">
+                        <thead>
+                            <tr>
+                                <th>الوارث</th>
+                                <th>الكسر</th>
+                                <th>النصيب الإجمالي</th>
+                                <th>عدد الأشخاص</th>
+                                <th>نصيب الفرد</th>
+                            </tr>
+                        </thead>
+                        <tbody id="distributionBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- الورثة المحجوبون -->
+                <div class="blocked-heirs" id="blockedSection" style="display: none;">
+                    <h3>الورثة المحجوبون</h3>
+                    <ul id="blockedList"></ul>
+                </div>
+
+                <!-- التقرير التفصيلي -->
+                <div class="detailed-report">
+                    <h3>التقرير التفصيلي</h3>
+                    <pre id="detailedReport"></pre>
+                </div>
+
+                <!-- أزرار التصدير -->
+                <div class="button-group">
+                    <button onclick="printReport()" class="btn-print">طباعة التقرير</button>
+                    <button onclick="exportPDF()" class="btn-export">تصدير PDF</button>
+                    <button onclick="shareResults()" class="btn-share">مشاركة</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- قسم المعلومات -->
+        <section class="info-section">
+            <h2>الأساس الشرعي</h2>
+            <div class="quran-references">
+                <div class="reference-card">
+                    <h4>سورة النساء - آية 11</h4>
+                    <p class="quran-text">
+                        ﴿يُوصِيكُمُ اللَّهُ فِي أَوْلَادِكُمْ ۖ لِلذَّكَرِ مِثْلُ حَظِّ الْأُنثَيَيْنِ﴾
+                    </p>
+                </div>
+                <div class="reference-card">
+                    <h4>سورة النساء - آية 12</h4>
+                    <p class="quran-text">
+                        ﴿وَلَكُمْ نِصْفُ مَا تَرَكَ أَزْوَاجُكُمْ إِن لَّمْ يَكُن لَّهُنَّ وَلَدٌ﴾
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>هذا البرنامج للاسترشاد فقط. يُنصح بمراجعة عالم شرعي متخصص للحالات المعقدة.</p>
+            <p>Islamic Inheritance Calculator © 2025</p>
+        </footer>
+    </div>
+
+    <script src="../src/inheritance-calculator.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
